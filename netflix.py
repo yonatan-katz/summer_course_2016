@@ -58,12 +58,13 @@ def regresion_test():
     
     train_x = x.drop(test_sample_id, 0)
     
-    train_y = y.drop(test_sample_id, 0)   
+    train_y = y.drop(test_sample_id, 0)    
+    
     
     '''
         Base line RMSE
     '''
-    print "Base line RMSE:", np.sqrt(np.mean((test_y - np.mean(train_y))**2))
+    print "Base line RMSE:", np.sqrt(np.mean((test_y[0] - np.mean(train_y[0]))**2))    
     
     res = sm.OLS(train_y, train_x).fit()   
     

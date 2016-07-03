@@ -17,7 +17,7 @@ def load_data(fname):
     return df
     
     
-def make_regression(fname="/home/test/projects/summer_course/data/prostate.data.txt"):
+def make_regression(fname="./data/prostate.data.txt"):
     
     data = load_data(fname)   
     
