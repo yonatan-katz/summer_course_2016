@@ -10,6 +10,8 @@ import numpy as np
 
 import statsmodels.formula.api as sm
 
+import matplotlib.pyplot as plt
+
 from IPython import get_ipython
 
 IPYTHON = get_ipython()
@@ -101,8 +103,6 @@ def regression_test():
 def pca_regression_test():
     from sklearn.decomposition import PCA    
     
-    import matplotlib.pyplot as plt    
-    
     x,y,dates,movies = load_data()
     
     x = x - np.mean(x)       
@@ -149,7 +149,10 @@ def pca_regression_test():
     plt.tight_layout()
     plt.show()    
     
-    test_x, train_x, test_y, train_y = create_test_train_set(pd.DataFrame(transformed_x,columns=["c1","c2", "c3"]), y)    
+    test_x, train_x, test_y, train_y = \
+        create_test_train_set(\
+            pd.DataFrame(\
+                transformed_x,columns=["c1","c2", "c3"]), y)    
     
     tr = train_x.ix[:, ["c1","c2"]]
     tr["y"] = train_y
@@ -158,13 +161,109 @@ def pca_regression_test():
     
     print res.summary()
     
+def multiple_pca_regression_test():
     
+    from sklearn.decomposition import PCA
     
+    x,y,dates,movies = load_data()
     
+    x = x - np.mean(x)       
     
+    x = x.ix[:, range(14)]
     
+    pca = PCA(n_components=14)
     
+    fitted = pca.fit(x)
     
+    transformed_x = fitted.fit_transform(x)
+    
+    columns = map(lambda x: "c"+str(x), range(14))
+    
+    test_x, train_x, test_y, train_y = \
+        create_test_train_set(\
+           pd.DataFrame(\
+             transformed_x,columns=columns), y) 
+   
+    train = train_x
+    test = test_x
+    train["intercept"] = np.ones(len(train_x))
+    test["intercept"] = np.ones(len(test_x))
+
+    
+    for r in range(1, 14):
+        columns_x = map(lambda x: "c"+str(x), range(r)) 
+        tr = train.ix[:, ["intercept"] + columns_x]
+        va = test.ix[:,  ["intercept"] + columns_x]
+        
+        res = sm.OLS(train_y, tr).fit()
+    
+        va.pred = res.predict(va)
+    
+        pca_error =  np.sqrt(np.mean((test_y.ix[:,0] -  va.pred)**2))
+    
+        print "PCA component:", r, ", validation error:", pca_error
+        
+        
+def ridge_regression_test():
+     from sklearn.linear_model import Ridge
+    
+     x,y,dates,movies = load_data()
+                
+     test_x, train_x, test_y, train_y = create_test_train_set(x, y)  
+     
+     alpha_vals = np.exp(np.arange(start=-15, stop=10,step=0.1))
+     
+     f, ax = plt.subplots(2,3)
+     
+     plot_num = 0
+           
+     for nuse in [50, 500, 5000]:
+        
+         use_id = np.random.choice(train_x.index,size=nuse,replace=False)
+                               
+         tx = train_x.ix[use_id,range(14)]
+         
+         ty = train_y.ix[use_id]
+         
+         to_plot_rmse = []
+
+         to_plot_coef = []
+         
+         for alpha in alpha_vals:
+            
+            fit = Ridge(alpha=alpha).fit(X=tx,y=ty)
+            
+            pred = fit.predict(test_x.ix[:, range(14)])
+            
+            res = test_y - pred
+            
+            RSS = np.sum(res**2)
+            
+            RMSE = RSS / len(test_y)
+            
+            to_plot_rmse.append(RMSE)
+            
+            to_plot_coef.append(np.sum(fit.coef_**2))
+                       
+         ax[0, plot_num].set_title("Ridge using %d training data" % nuse)
+         ax[0, plot_num].set_xscale("log")
+         ax[0, plot_num].set_xlabel("alpha")
+         ax[0, plot_num].set_ylabel("RMSE")
+         ax[0, plot_num].scatter(alpha_vals, to_plot_rmse)
+         
+         ax[1, plot_num].set_xscale("linear")
+         ax[1, plot_num].set_xlabel("sum of coef")
+         ax[1, plot_num].set_ylabel("RMSE")
+         ax[1, plot_num].scatter(to_plot_coef, to_plot_rmse)
+                     
+         plot_num += 1
+         
+         
+     plt.show()
+        
+     
+     
+     
     
     
     
