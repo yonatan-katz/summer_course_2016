@@ -66,14 +66,24 @@ def regression_test():
     
     x,y,dates,movies = load_data()
     
-    test_x, train_x, test_y, train_y = create_test_train_set(x, y)    
+    test_x, train_x, test_y, train_y = create_test_train_set(x, y) 
     
+    #Since upper case OLS doesn't add intecept automatically
+    #add it manually
+    test_x.loc[:,("intercept")] = np.ones(len(test_x))
+    
+    train_x.loc[:,("intercept")] = np.ones(len(train_x))
+    
+        
     '''
         Base line RMSE
     '''
     print "Base line RMSE:", np.sqrt(np.mean((test_y[0] - np.mean(train_y[0]))**2))    
     
-    res = sm.OLS(train_y, train_x).fit()   
+    res = sm.OLS(train_y, train_x).fit()  
+    
+    print res.summary()
+    
     
     in_sample = res.predict(train_x)
     
@@ -87,9 +97,10 @@ def regression_test():
     
     print "Clipped out sample RMSE:", np.sqrt(np.mean((test_y[0] - out_sample)**2))    
     
-    test_x = test_x.iloc[:, range(14)]
+    #intercept column index is 99
+    test_x = test_x.iloc[:, range(14) + [99]]
     
-    train_x = train_x.iloc[:, range(14)]
+    train_x = train_x.iloc[:, range(14) + [99]]
     
     res = sm.OLS(train_y, train_x).fit() 
     
@@ -139,11 +150,12 @@ def pca_regression_test():
     
     f, ax = plt.subplots(2,1)  
     
-    ax[0].set_title("Most high Comp1 scores")
+    ax[0].set_title("Most Low Comp1 scores")
     ax[0].hist(y.ix[transformed_x.argsort(0)[range(100),0]].values)
     
     
-    ax[1].set_title("Most low Comp1 scores")
+    ax[1].set_title("Most high Comp1 scores")
+    #get sorted values in the reversed order and take first 100 elements
     ax[1].hist(y.ix[transformed_x.argsort(0)[::-1,0]][0:100].values)
     
     plt.tight_layout()
@@ -157,6 +169,7 @@ def pca_regression_test():
     tr = train_x.ix[:, ["c1","c2"]]
     tr["y"] = train_y
     
+    #low case ols adds intercept automatically
     res = sm.ols(formula="y~c1+c2",data=tr).fit()
     
     print res.summary()
@@ -239,7 +252,7 @@ def ridge_regression_test():
             
             RSS = np.sum(res**2)
             
-            RMSE = RSS / len(test_y)
+            RMSE = np.sqrt(RSS / len(test_y))
             
             to_plot_rmse.append(RMSE)
             
@@ -262,12 +275,69 @@ def ridge_regression_test():
      plt.show()
         
      
+
+
+def lasso_regression_test():
+         
+     from sklearn.linear_model import Lasso
+    
+     x,y,dates,movies = load_data()
+                
+     test_x, train_x, test_y, train_y = create_test_train_set(x, y)  
      
+     alpha_vals = np.arange(start=10e-5, stop=1,step=0.01)
+
+     f, ax = plt.subplots(2,3)
      
+     plot_num = 0     
     
     
-    
-    
+     for nuse in [50,500,5000]:
+        
+         use_id = np.random.choice(train_x.index,size=nuse,replace=False)
+                               
+         tx = train_x.ix[use_id,range(14)]
+         
+         ty = train_y.ix[use_id]
+         
+         to_plot_rmse = []
+
+         to_plot_coef = []
+         
+         for alpha in alpha_vals:
+            
+            fit = Lasso(alpha=alpha).fit(X=tx,y=ty)
+            
+            pred = fit.predict(test_x.ix[:, range(14)])
+            
+            res = test_y.ix[:,0] - pred #just to align matrix shapes
+            
+            RSS = np.sum(res**2)
+            
+            RMSE = np.sqrt(RSS / len(test_y))
+            
+            to_plot_rmse.append(RMSE)
+            
+            to_plot_coef.append(np.sum(fit.coef_**2))
+                       
+         ax[0, plot_num].set_title("Lasso using %d training data" % nuse)
+         ax[0, plot_num].set_xscale("linear")
+         ax[0, plot_num].set_xlabel("alpha")
+         ax[0, plot_num].set_ylabel("RMSE")
+         ax[0, plot_num].scatter(alpha_vals, to_plot_rmse)
+         
+         ax[1, plot_num].set_xscale("linear")
+         ax[1, plot_num].set_xlabel("sum of coef")
+         ax[1, plot_num].set_ylabel("RMSE")
+         ax[1, plot_num].scatter(to_plot_coef, to_plot_rmse)
+                     
+         plot_num += 1
+         
+         
+     plt.show()
+         
+         
+         
     
     
     
