@@ -289,10 +289,15 @@ def lasso_regression_test():
 
      f, ax = plt.subplots(2,3)
      
-     plot_num = 0     
-    
+     plot_num = 0       
+     
+     #empty map
+     zero_coef = {}
     
      for nuse in [50,500,5000]:
+         
+         #map of empty arrays
+         zero_coef[nuse] = []
         
          use_id = np.random.choice(train_x.index,size=nuse,replace=False)
                                
@@ -307,10 +312,17 @@ def lasso_regression_test():
          for alpha in alpha_vals:
             
             fit = Lasso(alpha=alpha).fit(X=tx,y=ty)
+
+            coef = fit.coef_
             
-            pred = fit.predict(test_x.ix[:, range(14)])
+            #get number of zerro coefficients
+            z = len(coef[np.isclose(0.0, coef)])
             
-            res = test_y.ix[:,0] - pred #just to align matrix shapes
+            zero_coef[nuse].append(z)
+            
+            pred_test = fit.predict(test_x.ix[:, range(14)])
+            
+            res = test_y.ix[:,0] - pred_test #just to align matrix shapes
             
             RSS = np.sum(res**2)
             
@@ -332,6 +344,13 @@ def lasso_regression_test():
          ax[1, plot_num].scatter(to_plot_coef, to_plot_rmse)
                      
          plot_num += 1
+         
+     #new window
+     plt.figure(2)
+     
+     plt.title("Num of zerro vs alpha")
+     
+     plt.scatter(alpha_vals, zero_coef[5000])
          
          
      plt.show()
