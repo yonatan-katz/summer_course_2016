@@ -176,7 +176,7 @@ def pca_regression_test():
     
 def multiple_pca_regression_test():
     
-    from sklearn.decomposition import PCA
+    from sklearn.decomposition import PCA   
     
     x,y,dates,movies = load_data()
     
@@ -350,10 +350,128 @@ def lasso_regression_test():
      
      plt.title("Num of zerro vs alpha")
      
-     plt.scatter(alpha_vals, zero_coef[5000])
-         
+     plt.scatter(alpha_vals, zero_coef[5000])         
          
      plt.show()
+     
+     
+     
+def classification_regression_test():
+    
+    import code_exam   
+    
+    x,y,dates,movies = load_data()
+    
+    #add intercept to x matrix
+    x["intercept"] = np.ones(len(x))
+                
+    test_x, train_x, test_y, train_y = create_test_train_set(x, y)
+        
+    train_y.columns = ["y"]
+    
+    train_y.index = range(len(train_y))
+    
+    Y = np.zeros((len(train_x), 5))
+    
+    for i in [1,2,3,4,5]:
+        
+        expr = "y==" + str(i)
+        
+        Y[train_y.query(expr).index, i-1] = 1   
+    
+    
+    X = train_x
+    
+    Xt = X.transpose()
+    
+    XtX = Xt.dot(X)
+    
+    XtY = Xt.dot(Y)
+       
+    B = np.linalg.inv(XtX).dot(XtY)      
+    
+    preds = test_x.dot(B)     
+    
+    #predict on highest score
+    p1 = preds.apply(lambda x: np.argmax(x) + 1, 1)    
+    print "Highest score prediction summary"
+    code_exam.summary(p1)
+    print "###################################\n\n"
+    
+    #predict on excpected score
+    p2 = preds.apply(lambda x: x.dot([1,2,3,4,5]) / np.sum(x), 1)    
+    print "Expected score prediction summary"
+    code_exam.summary(p2)   
+    print "###################################\n\n"
+    
+    print "Coorelattion  between two scores is: ",\
+        np.corrcoef(p1, p2)[0][1]
+        
+    #MSE
+    print "Highest score predict mse:", np.sqrt(np.mean((p1-test_y.ix[:,0])**2))
+    print "Expected score predict mse:", np.sqrt(np.mean((p2-test_y.ix[:,0])**2))
+    
+    
+    
+def logistic_regression_test():
+    from sklearn.linear_model import LogisticRegression   
+    
+    import code_exam   
+    
+    x,y,dates,movies = load_data()
+    
+    #add intercept to x matrix
+    x["intercept"] = np.ones(len(x))
+                
+    test_x, train_x, test_y, train_y = create_test_train_set(x, y)    
+    
+#    
+#    fit = LogisticRegression(
+#        fit_intercept=False,
+#        multi_class='multinomial',
+#        solver='newton-cg',
+#        max_iter=300).fit(X=train_x,y=train_y.ix[:,0])
+#        
+#    
+#    
+#    #predict on highest score
+#    p1 = fit.predict(test_x)
+#    print "Highest score prediction summary"
+#    code_exam.summary(p1)
+#    print "###################################\n\n"
+#    
+#    #predict on expected score
+#    p_proba =  fit.predict_proba(test_x)    
+#    p2 = np.apply_along_axis(lambda x: x.dot([1,2,3,4,5]), 1, p_proba)    
+#    print "Expected score prediction summary"
+#    code_exam.summary(p2)   
+#    print "###################################\n\n"
+#    
+#    print "Coorelattion  between two scores is: ",\
+#        np.corrcoef(p1, p2)[0][1]
+#        
+#    #MSE
+#    print "Highest score predict mse:", np.sqrt(np.mean((p1-test_y.ix[:,0])**2))
+#    print "Expected score predict mse:", np.sqrt(np.mean((p2-test_y.ix[:,0])**2))
+    
+
+    #use statmodels package in order to intepret results of the logistic regression
+    import statsmodels.api as sm
+    
+    train_y.columns = ["y"]
+    
+    logit = sm.MNLogit(train_y, train_x.ix[:, range(14)+[99]])
+    
+    return logit.fit()
+    
+
+    
+    
+    
+    
+    
+    
+    
          
          
          
