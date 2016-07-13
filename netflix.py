@@ -425,34 +425,34 @@ def logistic_regression_test():
                 
     test_x, train_x, test_y, train_y = create_test_train_set(x, y)    
     
-#    
-#    fit = LogisticRegression(
-#        fit_intercept=False,
-#        multi_class='multinomial',
-#        solver='newton-cg',
-#        max_iter=300).fit(X=train_x,y=train_y.ix[:,0])
-#        
-#    
-#    
-#    #predict on highest score
-#    p1 = fit.predict(test_x)
-#    print "Highest score prediction summary"
-#    code_exam.summary(p1)
-#    print "###################################\n\n"
-#    
-#    #predict on expected score
-#    p_proba =  fit.predict_proba(test_x)    
-#    p2 = np.apply_along_axis(lambda x: x.dot([1,2,3,4,5]), 1, p_proba)    
-#    print "Expected score prediction summary"
-#    code_exam.summary(p2)   
-#    print "###################################\n\n"
-#    
-#    print "Coorelattion  between two scores is: ",\
-#        np.corrcoef(p1, p2)[0][1]
-#        
-#    #MSE
-#    print "Highest score predict mse:", np.sqrt(np.mean((p1-test_y.ix[:,0])**2))
-#    print "Expected score predict mse:", np.sqrt(np.mean((p2-test_y.ix[:,0])**2))
+    
+    fit = LogisticRegression(
+        fit_intercept=False,
+        multi_class='multinomial',
+        solver='newton-cg',
+        max_iter=300).fit(X=train_x,y=train_y.ix[:,0])
+        
+    
+    
+    #predict on highest score
+    p1 = fit.predict(test_x)
+    print "Highest score prediction summary"
+    code_exam.summary(p1)
+    print "###################################\n\n"
+    
+    #predict on expected score
+    p_proba =  fit.predict_proba(test_x)    
+    p2 = np.apply_along_axis(lambda x: x.dot([1,2,3,4,5]), 1, p_proba)    
+    print "Expected score prediction summary"
+    code_exam.summary(p2)   
+    print "###################################\n\n"
+    
+    print "Coorelattion  between two scores is: ",\
+        np.corrcoef(p1, p2)[0][1]
+        
+    #MSE
+    print "Highest score predict mse:", np.sqrt(np.mean((p1-test_y.ix[:,0])**2))
+    print "Expected score predict mse:", np.sqrt(np.mean((p2-test_y.ix[:,0])**2))
     
 
     #use statmodels package in order to intepret results of the logistic regression
@@ -465,8 +465,39 @@ def logistic_regression_test():
     return logit.fit()
     
 
+
+
+def lda_test():
+    import pandas as pd
     
+    from sklearn.discriminant_analysis import LinearDiscriminantAnalysis   
     
+    x,y,dates,movies = load_data()
+                
+    test_x, train_x, test_y, train_y = create_test_train_set(x, y)     
+    
+    fit = LinearDiscriminantAnalysis().fit(train_x, train_y.ix[:,0])
+    
+    #predict with most likely class
+    predict1 = fit.predict(test_x)
+    
+    proba = fit.predict_proba(test_x)
+    
+    #predict with expected value
+    predict2 = np.apply_along_axis(
+        lambda x: x.dot([1,2,3,4,5]), 1, proba)
+    
+    print pd.Series(predict1).describe()
+    
+    print pd.Series(predict2).describe()
+    
+    print "Correlation :", np.corrcoef(predict1, predict2)[0][1]
+    
+    print "Highest score predict mse:", \
+       np.sqrt(np.mean((predict1-test_y.ix[:,0])**2))
+   
+    print "Expected score predict mse:", \
+       np.sqrt(np.mean((predict2-test_y.ix[:,0])**2))
     
     
     
