@@ -464,41 +464,81 @@ def logistic_regression_test():
     
     return logit.fit()
     
-
-
-
-def lda_test():
-    import pandas as pd
     
-    from sklearn.discriminant_analysis import LinearDiscriminantAnalysis   
+def add_missed_value_indicator(data):
+    
+    #get row mean vector
+    mean = data.mean(axis=1).astype(int)
+    
+    for c in data.columns[14:]:
+        i = "i_"+c
+        data.ix[:,i] = np.zeros(len(data))
+        missed  = data.ix[data[c]==0]                
+        data.ix[missed.index,i] = np.ones(len(missed))
+        
+        #substitute missing data with row average
+        data.ix[missed.index,c] = mean.ix[missed.index]
+        
+    return data
+        
+    
+    
+def make_tree_test():
+    from sklearn import tree
+    
+    import StringIO
+    
+    import pydot
+    
+    from IPython.display import display, Image     
     
     x,y,dates,movies = load_data()
+    
+    #x =  add_missed_value_indicator(x)   
                 
-    test_x, train_x, test_y, train_y = create_test_train_set(x, y)     
+    test_x, train_x, test_y, train_y = create_test_train_set(x, y)          
     
-    fit = LinearDiscriminantAnalysis().fit(train_x, train_y.ix[:,0])
+    clf = tree.DecisionTreeClassifier(min_samples_split=3000)
     
-    #predict with most likely class
-    predict1 = fit.predict(test_x)
+    fit = clf.fit(train_x,train_y)
     
-    proba = fit.predict_proba(test_x)
+    dot_data = StringIO.StringIO()
     
-    #predict with expected value
-    predict2 = np.apply_along_axis(
-        lambda x: x.dot([1,2,3,4,5]), 1, proba)
+    tree.export_graphviz(fit, 
+       feature_names=train_x.columns,
+       class_names=["1","2","3","4","5"],
+       out_file=dot_data)
     
-    print pd.Series(predict1).describe()
+    graph = pydot.graph_from_dot_data(dot_data.getvalue())   
     
-    print pd.Series(predict2).describe()
+    graph[0].write_png("tree_toy.png")
     
-    print "Correlation :", np.corrcoef(predict1, predict2)[0][1]
+    img = Image(graph[0].create_png()) 
     
-    print "Highest score predict mse:", \
-       np.sqrt(np.mean((predict1-test_y.ix[:,0])**2))
-   
-    print "Expected score predict mse:", \
-       np.sqrt(np.mean((predict2-test_y.ix[:,0])**2))
+    display(img)
+
+    return fit
     
+    
+def make_bagging_test():
+    
+    from sklearn.ensemble import BaggingClassifier
+    
+    x,y,dates,movies = load_data()
+    
+    x =  add_missed_value_indicator(x)   
+                
+    test_x, train_x, test_y, train_y = create_test_train_set(x, y)      
+    
+    clf = BaggingClassifier(n_estimators=100, max_features=1.0,\
+        max_samples=0.8).fit(train_x, train_y.ix[:,0])
+    
+    pred = clf.predict(test_x)   
+    
+    print "mse:", np.sqrt(np.mean((pred-test_y.ix[:,0])**2))
+    
+    
+    return  pred
     
     
     
