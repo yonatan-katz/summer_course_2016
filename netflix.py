@@ -1,9 +1,5 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Jun 29 14:30:01 2016
+""" A number of statistical algo examples implemented in Python """
 
-@author: test
-"""
 import pandas as pd
 
 import numpy as np
@@ -17,6 +13,7 @@ from IPython import get_ipython
 IPYTHON = get_ipython()
 
 IPYTHON.magic('load_ext autoreload')
+
 IPYTHON.magic('autoreload 2')
 
 
