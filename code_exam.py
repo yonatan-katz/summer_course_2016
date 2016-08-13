@@ -1,10 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-Spyder Editor
-
-This temporary script file is located here:
-/home/test/.spyder2/.temp.py
-"""
+"""Simple regression code example"""
 
 import numpy as np
 import pandas as pd
