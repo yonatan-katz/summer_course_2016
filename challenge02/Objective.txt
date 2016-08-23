@@ -1,6 +1,6 @@
 CHARITY_INDICATOR: Binary Indicator for Response 
 CHARITY_AMOUNT: Donation Amount (in $) 
-Y = 1 if CHARITY_AMOUNT > 0.50 0 otherwise
+Y = 1 if CHARITY_AMOUNT > 0.70 0 otherwise
 
 Objective:
 find y^ which maximize 

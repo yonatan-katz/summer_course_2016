@@ -1,0 +1,14 @@
+CHARITY_INDICATOR: Binary Indicator for Response 
+CHARITY_AMOUNT: Donation Amount (in $) 
+Y = 1 if CHARITY_AMOUNT > 0.00 0 otherwise
+
+Objective:
+using only 'MAXRAMNT', 'RFA_3' try to find the best Y classifier
+using only 'LASTDATE', 'TCODE' try to find the best Y classifier
+using only 'POBC2', 'AGE', 'PEPSTRFL' try to find the best Y classifier
+
+* use feature selection process on the entire database
+
+*** find y^ which maximize 
+sum CHARITY_AMOUNT-0.7 if y^=1 and 0 otherwise
+
