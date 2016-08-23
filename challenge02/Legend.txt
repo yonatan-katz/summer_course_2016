@@ -904,9 +904,9 @@ AVGGIFT                     Average dollar amount of gifts to date
 --------------------------  -------------------------------------------------
 CONTROLN                    Control number (unique record identifier)
 
-TARGET_B                    Target Variable: Binary Indicator for Response to 
+CHARITY_INDICATOR	    Target Variable: Binary Indicator for Response to 
                             97NK Mailing
-TARGET_D                    Target Variable: Donation Amount (in $) associated 
+CHARITY_AMOUNT                    Target Variable: Donation Amount (in $) associated 
                             with the Response to 97NK Mailing
 
 HPHONE_D                    Indicator for presence of a published home 
