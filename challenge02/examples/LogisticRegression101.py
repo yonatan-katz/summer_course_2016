@@ -9,12 +9,10 @@ import pandas as pd
 import statsmodels.formula.api as smf
 import statsmodels.api as sm
 import numpy as np
-import itertools
 import sklearn.ensemble
 import sklearn.feature_extraction
 import os
  
-the_dir = ''
 os.chdir(the_dir)
  
 train_df = pd.read_csv('./charity.train.csv.gz', compression='gzip')
@@ -26,7 +24,7 @@ def get_quantiles(x, num_levels):
  
 def thermo_enc(df, col, levels):
     for n, level in enumerate(levels):
-        df['{}_t{}'.format(col, n)] = df[col] <= level
+        df['{}_t{}'.format(col, n)] = np.maximum(0, df[col] - level)
     return df
  
 quant = get_quantiles(train_df.MAXRAMNT, 5)
@@ -62,7 +60,7 @@ cols = 'MAXRAMNT+MAXRAMNT_t0+MAXRAMNT_t1+MAXRAMNT_t2+MAXRAMNT_t3+RFA_3R+RFA_3F+R
 glm_fit = smf.glm(formula='y~'+cols, data=train_small_df, family=sm.families.Binomial()).fit()
 y_hat = glm_fit.predict(valid_small_df)
 print calculate_deviance(y_hat, valid_small_df.y)
-# 0.990012
+# 989925510749
  
 # Sklearn input is different - need to create X and y as numpy arrays
 # Also need to take care of categorical x
