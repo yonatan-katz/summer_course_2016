@@ -1,0 +1,4 @@
+y - log in base 10 of the duration in sec (minimum of 1 sec)
+
+Prediction objective:
+minimize the squared loss.

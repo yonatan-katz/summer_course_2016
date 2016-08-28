@@ -1,0 +1,39 @@
+VendorID: A code indicating the provider that provided the record.
+1= Creative Mobile Technologies, LLC; 2= VeriFone Inc.
+
+from_datetime:
+The date and time when the meter was engaged. string est
+
+Passenger_count:
+The number of passengers in the vehicle. This is a driver-entered value.
+
+Trip_distance:
+The elapsed trip distance in miles reported by the taximeter.
+
+from_longitude:
+Longitude where the meter was engaged.
+
+from_latitude:
+Latitude where the meter was engaged.
+
+to_longitude:
+Longitude where the meter was disengaged.
+
+to_ latitude:
+Latitude where the meter was disengaged.
+
+RateCodeID:
+The final rate code in effect at the end of the trip.
+Standard rate
+JFK
+Newark
+Nassau or Westchester
+Negotiated fare
+Group ride
+Missing
+
+
+Payment_type:
+A code signifying how the passenger paid for the trip.
+Credit card
+Cash
